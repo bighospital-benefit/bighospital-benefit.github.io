@@ -143,8 +143,8 @@ footer{padding:28px 0 120px;border-top:1px solid var(--line);font-size:12px;colo
 .next b{display:block;color:var(--ink);font-size:15.5px}
 #done button{margin-top:14px;min-height:50px;padding:0 28px;border-radius:14px;border:1px solid var(--line);background:none;font-weight:800;cursor:pointer;color:var(--ink)}
 
-.rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.1,1)}
-.rv.in{opacity:1;transform:none}
+.js .rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.1,1)}
+.js .rv.in{opacity:1;transform:none}
 /* 2026-10-28 ESL 길잡이 승인 모션 이식: 배경 30초 4% 확대 · 줄 순차 0.06초 · 숫자 0→값 · '선착순' 펄스 1회 · 튕김 없음 */
 #hero{overflow:hidden}
 #hero .bg{animation:bgz 30s ease-in-out infinite alternate;transform-origin:50% 45%}
@@ -154,7 +154,7 @@ footer{padding:28px 0 120px;border-top:1px solid var(--line);font-size:12px;colo
 .fld>.ck{display:flex;gap:12px;align-items:flex-start;font-size:16.5px;font-weight:600;line-height:1.5;cursor:pointer;text-align:left}
 .fld .ck input{flex:none;width:24px;height:24px;padding:0;margin-top:1px;accent-color:var(--gold)}
 .ck b{color:var(--gold)}
-@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.dock,.sh{transition:none}#hero .bg,.top .co{animation:none}}
+@media (prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none;transition:none}.dock,.sh{transition:none}#hero .bg,.top .co{animation:none}}
 
 /* 2026-10-28 지점장님 "가운데 정렬 · 글자크기 60대도 보기쉽게" — 본문·신청 칸 글씨를 키우고 신청 선택지 글자는 가운데 */
 .eyebrow{font-size:14px}
@@ -321,6 +321,7 @@ footer{font-size:14px}
 
 <script>
 (function(){
+document.documentElement.classList.add('js'); // 스크립트가 못 돌면 .rv 글이 숨지 않게
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .2 });
 $$('.rv').forEach(el => io.observe(el));
@@ -328,7 +329,7 @@ $$('.rv').forEach(el => io.observe(el));
 $$('.bens, .warn, #program .wrap, .for').forEach(g => $$('.rv', g).forEach((el, i) => el.style.transitionDelay = (i * 0.06) + 's'));
 // 숫자 0→값 (0.9초, 감속)
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const countUp = el => { const m = el.textContent.match(/^(\d+)(.*)$/); if (reduce || !m) return; const end = +m[1], rest = m[2]; let t0; const f = ts => { t0 ??= ts; const k = Math.min(1, (ts - t0) / 900); el.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))) + rest; if (k < 1) requestAnimationFrame(f); }; el.textContent = '0' + rest; requestAnimationFrame(f); };
+const countUp = el => { const m = el.textContent.match(/^(\d+)(.*)$/); if (reduce || !m) return; const end = +m[1], rest = m[2]; let t0; const f = ts => { if (!t0) t0 = ts; const k = Math.min(1, (ts - t0) / 900); el.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))) + rest; if (k < 1) requestAnimationFrame(f); }; el.textContent = '0' + rest; requestAnimationFrame(f); };
 const cio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { countUp(e.target); cio.unobserve(e.target); } }), { threshold: .6 });
 $$('.stat .n b, .fund .f3 b').forEach(el => cio.observe(el));
 const dock = $('#dock');
